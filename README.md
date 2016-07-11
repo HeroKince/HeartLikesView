@@ -4,8 +4,14 @@
 
 1、View方式
 
+https://github.com/HomHomLin/Android-DivergeView
+
 
 2、SurfaceView方式
 
+https://github.com/zhangjinyuanfly/project
 
 3、属性动画方式
+
+https://github.com/Yasic/QQBubbleView
+https://github.com/Vincenter/Periscrope
