@@ -5,11 +5,13 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Build;
@@ -51,6 +53,8 @@ public class HeartLikeSurfaceView extends SurfaceView implements SurfaceHolder.C
     private boolean mFlag;//
     private long start_time = 0;
 
+    private Context mContext;
+
     private Handler mHandler = new Handler() {
 
         @Override
@@ -58,7 +62,7 @@ public class HeartLikeSurfaceView extends SurfaceView implements SurfaceHolder.C
             int what = msg.what;
             switch (what) {
                 case 0:
-                    list.add(new PathObj(getWidth(), getHeight(), mBitmap));
+                    list.add(new PathObj(mBitmap));
                     break;
 
                 default:
@@ -147,6 +151,7 @@ public class HeartLikeSurfaceView extends SurfaceView implements SurfaceHolder.C
     }
 
     private void init(Context context) {
+        mContext = context;
         mHolder = getHolder();
         mHolder.addCallback(this);
         mHolder.setFormat(PixelFormat.TRANSLUCENT);
@@ -156,12 +161,18 @@ public class HeartLikeSurfaceView extends SurfaceView implements SurfaceHolder.C
 
         setFocusable(true);
 
-        mBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.heart);
-        totalBitmaps = new ArrayList<Bitmap>();
-        totalBitmaps.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.heart));
-        totalBitmaps.add(BitmapFactory.decodeResource(context.getResources(), R.drawable.heart));
+        mBitmap = createHeart();
+        totalBitmaps = new ArrayList<>();
+        addRandomHeart(mBitmap);
 
         setZOrderOnTop(true);
+    }
+
+    /**
+     * @param bitmap
+     */
+    public void addRandomHeart(Bitmap bitmap) {
+        totalBitmaps.add(bitmap);
     }
 
     /**
@@ -175,7 +186,7 @@ public class HeartLikeSurfaceView extends SurfaceView implements SurfaceHolder.C
                 pagerCanvas.drawPaint(mPaint);
                 mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
                 pagerCanvas.save(Canvas.ALL_SAVE_FLAG);// 保存
-                drawQpath(pagerCanvas);
+                drawPath(pagerCanvas);
                 pagerCanvas.restore();// 存储
                 mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
                 mCanvas.drawPaint(mPaint);
@@ -192,12 +203,39 @@ public class HeartLikeSurfaceView extends SurfaceView implements SurfaceHolder.C
         }
     }
 
+    private int randomColor() {
+        return Color.rgb(mRandom.nextInt(255), mRandom.nextInt(255), mRandom.nextInt(255));
+    }
+
+    public Bitmap createHeart() {
+        Bitmap sHeart = BitmapFactory.decodeResource(getResources(), R.drawable.heart);
+        Bitmap sHeartBorder = BitmapFactory.decodeResource(getResources(), R.drawable.heart_border);
+
+        Bitmap heart = sHeart;
+        Bitmap heartBorder = sHeartBorder;
+        Bitmap bm = createBitmapSafely(heartBorder.getWidth(), heartBorder.getHeight());
+        if (bm == null) {
+            return null;
+        }
+        Canvas canvas = new Canvas();
+        canvas.setBitmap(bm);
+        Paint p = new Paint();
+        canvas.drawBitmap(heartBorder, 0, 0, p);
+        p.setColorFilter(new PorterDuffColorFilter(randomColor(), PorterDuff.Mode.SRC_ATOP));
+        float dx = (heartBorder.getWidth() - heart.getWidth()) / 2f;
+        float dy = (heartBorder.getHeight() - heart.getHeight()) / 2f;
+        canvas.drawBitmap(heart, dx, dy, p);
+        p.setColorFilter(null);
+        canvas.setBitmap(null);
+        return bm;
+    }
+
     /**
      * 绘制贝赛尔曲线
      *
      * @param canvas 主画布
      */
-    public void drawQpath(Canvas canvas) {
+    public void drawPath(Canvas canvas) {
         if (list.size() <= 0) {
             mFlag = false;
         }
@@ -232,7 +270,7 @@ public class HeartLikeSurfaceView extends SurfaceView implements SurfaceHolder.C
             // 禁止同时显示多个赞
             start_time = System.currentTimeMillis();
             Bitmap bitmap = totalBitmaps.get(mRandom.nextInt(totalBitmaps.size()));
-            list.add(new PathObj(getWidth(), getHeight(), bitmap));
+            list.add(new PathObj(bitmap));
             startThread();
         }
     }
@@ -255,6 +293,15 @@ public class HeartLikeSurfaceView extends SurfaceView implements SurfaceHolder.C
         }
     }
 
+    private static Bitmap createBitmapSafely(int width, int height) {
+        try {
+            return Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444);
+        } catch (OutOfMemoryError error) {
+            error.printStackTrace();
+        }
+        return null;
+    }
+
     /**
      * 随机路径
      */
@@ -270,7 +317,6 @@ public class HeartLikeSurfaceView extends SurfaceView implements SurfaceHolder.C
 
         public int curPos;
         public int length;// 路径总长度
-        private int startX = 300, startY = 0, controlX, controlY, controlX2, controlY2, endX, endY;
         private float[] p = new float[2];// 坐标点，很重要
 
         private int time;// 执行的次数
@@ -293,27 +339,15 @@ public class HeartLikeSurfaceView extends SurfaceView implements SurfaceHolder.C
         /**
          * 初始化路径
          *
-         * @param width  控件宽度
-         * @param height 控件高度
          * @param bitmap 绘制的图片
          */
-        public PathObj(int width, int height, Bitmap bitmap) {
+        public PathObj(Bitmap bitmap) {
             this.bitmap = bitmap;
             this.bitmapWidth = bitmap.getWidth();
             this.bitmapHeight = bitmap.getHeight();
 
             bitmapWidthDst = bitmapWidth;// + bitmapWidth/4;
             bitmapHeightDst = bitmapHeight;// + bitmapHeight/4;
-
-            startX = width - bitmapWidthDst / 2;
-            startY = height;
-            endY = 0;
-            curPos = 0;
-            endX = mRandom.nextInt(width / 2) + width / 4;
-            controlX = mRandom.nextInt(width - bitmapWidthDst) + bitmapWidthDst / 2;
-            controlY = mRandom.nextInt(height / 2) + height / 2;
-            controlX2 = mRandom.nextInt(width - bitmapWidthDst) + bitmapWidthDst / 2;
-            controlY2 = mRandom.nextInt(height / 2) + height / 4;
 
             src = new Rect(0, 0, bitmapWidth, bitmapHeight);
             dst = new Rect(0, 0, bitmapWidthDst / 2, bitmapHeightDst / 2);
@@ -323,8 +357,36 @@ public class HeartLikeSurfaceView extends SurfaceView implements SurfaceHolder.C
 
             path = new Path();
             pathMeasure = new PathMeasure();
-            path.moveTo(startX, startY);
-            path.cubicTo(controlX, controlY, controlX2, controlY2, endX, endY);
+
+            Random r = mRandom;
+            int factor = 2;
+            int initX = (int) mContext.getResources().getDimension(R.dimen.heart_anim_init_x);
+            int initY = (int) mContext.getResources().getDimension(R.dimen.heart_anim_init_y);
+            int xRand = (int) mContext.getResources().getDimension(R.dimen.heart_anim_bezier_x_rand);
+            int animLengthRand = (int) mContext.getResources().getDimension(R.dimen.heart_anim_length_rand);
+            int bezierFactor = 6;
+            int animLength = (int) mContext.getResources().getDimension(R.dimen.heart_anim_length);
+            int xPointFactor = (int) mContext.getResources().getDimension(R.dimen.heart_anim_x_point_factor);
+
+            int x = r.nextInt(xRand);
+            int x2 = r.nextInt(xRand);
+
+            int y = getHeight() - initY;
+            int y2 = animLength * factor + r.nextInt(animLengthRand);
+
+            factor = y2 / bezierFactor;
+
+            x = xPointFactor + x;
+            x2 = xPointFactor + x2;
+
+            int y3 = y - y2;
+            y2 = y - y2 / 2;
+
+            path.moveTo(initX, y);
+            path.cubicTo(initX, y - factor, x, y2 + factor, x, y2);
+            path.moveTo(x, y2);
+            path.cubicTo(x, y2 - factor, x2, y3 + factor, x2, y3);
+
             pathMeasure.setPath(path, false);
             length = (int) pathMeasure.getLength();
             speed = mRandom.nextInt(1) + 1f;
