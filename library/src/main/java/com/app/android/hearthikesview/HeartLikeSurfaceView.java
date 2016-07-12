@@ -358,7 +358,6 @@ public class HeartLikeSurfaceView extends SurfaceView implements SurfaceHolder.C
             path = new Path();
             pathMeasure = new PathMeasure();
 
-            Random r = mRandom;
             int factor = 2;
             int initX = (int) mContext.getResources().getDimension(R.dimen.heart_anim_init_x);
             int initY = (int) mContext.getResources().getDimension(R.dimen.heart_anim_init_y);
@@ -368,11 +367,11 @@ public class HeartLikeSurfaceView extends SurfaceView implements SurfaceHolder.C
             int animLength = (int) mContext.getResources().getDimension(R.dimen.heart_anim_length);
             int xPointFactor = (int) mContext.getResources().getDimension(R.dimen.heart_anim_x_point_factor);
 
-            int x = r.nextInt(xRand);
-            int x2 = r.nextInt(xRand);
+            int x = mRandom.nextInt(xRand);
+            int x2 = mRandom.nextInt(xRand);
 
             int y = getHeight() - initY;
-            int y2 = animLength * factor + r.nextInt(animLengthRand);
+            int y2 = animLength * factor + mRandom.nextInt(animLengthRand);
 
             factor = y2 / bezierFactor;
 
