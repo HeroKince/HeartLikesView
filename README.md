@@ -14,4 +14,9 @@ https://github.com/zhangjinyuanfly/project
 3、属性动画方式
 
 https://github.com/Yasic/QQBubbleView
+
+
 https://github.com/Vincenter/Periscrope
+
+
+https://github.com/AlanCheen/PeriscopeLayout
