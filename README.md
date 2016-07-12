@@ -1,7 +1,7 @@
 # HeartLikesView
 直播点赞动画实现方案目前基本有三种，一是
 
-![device-2016-07-12-212947.png](art/device-2016-07-12-212947.png)
+![device-2016-07-12-212947-7266.png](art/device-2016-07-12-212947-7266.png)
 
 1、View方式
 
