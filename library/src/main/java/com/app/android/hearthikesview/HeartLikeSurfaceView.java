@@ -42,7 +42,7 @@ public class HeartLikeSurfaceView extends SurfaceView implements SurfaceHolder.C
     private Bitmap mBitmap;// 当前显示的图像
     private ArrayList<Bitmap> totalBitmaps;// 一共有几种图像
 
-    private List<PathObj> list = new ArrayList<PathObj>();// 路径
+    private List<PathObj> list = new ArrayList<>();// 路径
 
     private Canvas pagerCanvas;
     private Bitmap pagerBitmap;// 每次使用这个bitmap刷新
@@ -51,7 +51,7 @@ public class HeartLikeSurfaceView extends SurfaceView implements SurfaceHolder.C
 
     public static int screenW, screenH;
     private boolean mFlag;//
-    private long start_time = 0;
+    private long mStartTime = 0;
 
     private Context mContext;
 
@@ -152,6 +152,7 @@ public class HeartLikeSurfaceView extends SurfaceView implements SurfaceHolder.C
 
     private void init(Context context) {
         mContext = context;
+
         mHolder = getHolder();
         mHolder.addCallback(this);
         mHolder.setFormat(PixelFormat.TRANSLUCENT);
@@ -266,9 +267,9 @@ public class HeartLikeSurfaceView extends SurfaceView implements SurfaceHolder.C
      * 点赞
      */
     public void click() {
-        if (System.currentTimeMillis() - start_time > 50) {
+        if (System.currentTimeMillis() - mStartTime > 50) {
             // 禁止同时显示多个赞
-            start_time = System.currentTimeMillis();
+            mStartTime = System.currentTimeMillis();
             Bitmap bitmap = totalBitmaps.get(mRandom.nextInt(totalBitmaps.size()));
             list.add(new PathObj(bitmap));
             startThread();
@@ -416,25 +417,6 @@ public class HeartLikeSurfaceView extends SurfaceView implements SurfaceHolder.C
          */
         public Rect getSrcRect() {
             return src;
-        }
-
-        /**
-         * 暂时不用了
-         *
-         * @return
-         */
-        @Deprecated
-        public float[] getPos() {
-            curPos += speed;
-            speed += acceleratedSpeed;
-            if (curPos > length) {
-                curPos = length;
-                return null;
-            }
-            pathMeasure.getPosTan(curPos, p, null);
-            time++;
-            alpha();
-            return p;
         }
 
         /**
