@@ -5,13 +5,14 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 
 import com.app.android.hearthikesview.HeartLikeSurfaceView;
+import com.app.android.hearthikesview.HeartLikeView;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
-    private HeartLikeSurfaceView mLikeView;
+    private HeartLikeView mLikeView;
     private Timer mTimer = new Timer();
 
     @Override
@@ -19,25 +20,24 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mLikeView = (HeartLikeSurfaceView) findViewById(R.id.likeview);
+        mLikeView = (HeartLikeView) findViewById(R.id.likeview);
         mTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 mLikeView.post(new Runnable() {
                     @Override
                     public void run() {
-                        mLikeView.click();
+                        mLikeView.showHeartView();
                     }
                 });
             }
-        }, 500, 200);
-
+        }, 100, 100);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if(event.getAction() == MotionEvent.ACTION_UP){
-            mLikeView.click();
+            mLikeView.showHeartView();
         }
         return super.onTouchEvent(event);
     }
