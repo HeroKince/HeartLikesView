@@ -11,7 +11,7 @@ HeartLikeSurfaceView性能如下：
 目前，基本达到项目使用的需求，当然还有很多优化的空间，欢迎fork你的一份力量。
 
 HeartLikeView性能如下：
-![20160713103120.png](art/2016-08-02 16-19-36-snapshot)
+![20160713103120.png](art/2016-08-02-snapshot.png)
 
 下面是githu中整理的实现方案，及供参考：
 
