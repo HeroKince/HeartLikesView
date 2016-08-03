@@ -24,6 +24,8 @@ https://github.com/HomHomLin/Android-DivergeView
 
 https://github.com/zhangjinyuanfly/project
 
+https://github.com/poikl369/HeartSurfaceView
+
 3、属性动画方式
 
 https://github.com/tyrantgit/HeartLayout
